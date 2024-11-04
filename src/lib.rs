@@ -72,15 +72,29 @@ impl Settings {
         });
     }
 
-    /// 全局存放配置文件的所在目录(即当前配置文件所在目录)
-    pub fn global_config_dir(&self) -> &PathBuf {
+    /// 全局配置文件所在目录(即当前配置文件所在目录)
+    pub fn config_dir(&self) -> &PathBuf {
         &self.config_dir
     }
 
-    /// 通过配置文件所在目录(亦是配置文件的相对路径)附加新路径
+    // 是对 Config 的`get_xx`方法的补充
+    /// 获取配置中的路径。
     ///
-    /// 即以当前配置文件所在目录为basename，在该路径后面附加额外的子路径
-    pub fn join_path<T: AsRef<Path>>(&self, p: T) -> PathBuf {
-        self.config_dir.join(p.as_ref())
+    /// - 如果key不存在或者获取的值为空字符串，则返回Err
+    /// - 如果获取的值value是绝对路径(例如`/path/to/file`)，则返回Ok(value)对应的路径
+    /// - 如果获取的值value是相对路径(例如`./path/file`)，则相对于当前全局配置文件所在的目录，
+    ///   并返回附加子路径后的完整绝对路径
+    pub fn get_path(&self, key: &str) -> Result<PathBuf, config::ConfigError> {
+        let value = self.get_string(key)?;
+        if value.is_empty() {
+            Err(config::ConfigError::Message("empty value".into()))
+        } else {
+            let p = Path::new(&value);
+            if p.is_absolute() {
+                Ok(p.to_path_buf())
+            } else {
+                Ok(self.config_dir().join(&value))
+            }
+        }
     }
 }

@@ -7,8 +7,8 @@ fn main() {
         println!("{:?}", config);
         println!("{:?}", config.get_string("file.name"));
 
-        let file = config.get_string("delist.delist_db_file").unwrap();
-        println!("{:?}", config.join_path(&file));
+        let file = config.get_path("delist.delist_db_file").unwrap();
+        println!("{:?}", file);
     }
 
     // 全局初始化加载配置文件，从环境变量`DEFAULT_GLOBAL_CONFIG`指定的配置文件中读取配置并加载
