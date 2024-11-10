@@ -1,3 +1,14 @@
+//! 本地配置信息加载库(本地配置文件由环境变量 `DEFAULT_GLOBAL_CONFIG` 指定)
+//!
+//! ```no_run
+//! // 初始化并获取全局配置
+//! let settings = global_config().get().unwrap();
+//! // 获取配置中的某项配置，返回值为字符串
+//! let name = settings.get_string("delist.name").unwrap();
+//! // 获取配置中的某项配置，返回值为路径PathBuf
+//! let db_file = settings.get_path("delist.db_file").unwrap();
+//! ```
+
 use anyhow::{bail, Context};
 use config::Config;
 use std::{
@@ -6,11 +17,13 @@ use std::{
     sync::OnceLock,
 };
 
+/// 全局配置(线程安全)
+static CELL: OnceLock<Settings> = OnceLock::new();
+
 /// 加载全局默认配置文件(配置文件由环境变量 `DEFAULT_GLOBAL_CONFIG` 指定)
 ///
 /// 全局配置线程安全
 pub fn global_config() -> &'static OnceLock<Settings> {
-    static CELL: OnceLock<Settings> = OnceLock::new();
     CELL.get_or_init(|| {
         Settings::new(None).unwrap_or_else(|e| panic!("load global config fail: {e}"))
     });
