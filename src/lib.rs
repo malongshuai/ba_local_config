@@ -78,11 +78,11 @@ impl Settings {
 
         settings = settings.add_source(config::File::with_name(path.to_str().unwrap()));
 
-        return Ok(Settings {
+        Ok(Settings {
             config_dir: PathBuf::from(path.canonicalize()?.parent().unwrap()),
             config_filename: path.file_name().unwrap().to_string_lossy().to_string(),
             settings: settings.build()?,
-        });
+        })
     }
 
     /// 全局配置文件所在目录(即当前配置文件所在目录)
